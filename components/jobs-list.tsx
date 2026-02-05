@@ -72,8 +72,10 @@ export function JobsList() {
   return (
     <div>
       {/* Search */}
-      <div className="relative mb-8">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      <div className="relative mb-10">
+        <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+          <Search className="h-5 w-5 text-muted-foreground/60" />
+        </div>
         <input
           type="text"
           placeholder="Search by job title, company, or location..."
@@ -82,14 +84,16 @@ export function JobsList() {
             setSearchQuery(e.target.value)
             setCurrentPage(1)
           }}
-          className="w-full pl-14 pr-6 py-4 bg-background border border-border rounded-full text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-border/40 rounded-2xl text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-base shadow-sm"
         />
       </div>
 
       {/* Count */}
-      <p className="text-sm text-muted-foreground mb-6">
-        Showing {paginatedJobs.length} of {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"}
-      </p>
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-sm font-semibold text-foreground/70">
+          Showing <span className="text-primary">{paginatedJobs.length}</span> of {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"}
+        </p>
+      </div>
 
       {/* Jobs Grid */}
       {paginatedJobs.length > 0 ? (
