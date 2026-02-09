@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 const faqs = [
   {
     question: "How does coordinators.pro help my career?",
-    answer: "We connect you with high-growth companies that offer more than just a paycheck—they offer mentorship, clear career paths, and a culture that values your professional development."
+    answer: "Coordinators is dedicated to bringing out your full potential through coaching, mentorship, and continual development opportunities—not just job placement."
   },
   {
     question: "Is it really faster than typical job boards?",
@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     question: "What kind of roles are listed here?",
-    answer: "We focus on specialized coordinator and operations roles across healthcare, tech, and professional services that require high levels of organization, communication, and leadership potential."
+    answer: "We focus on doctors and other healthcare providers, placing specialized coordinator and operations roles that demand exceptional organization and communication."
   },
   {
     question: "Do I need to pay any fees as a job seeker?",
