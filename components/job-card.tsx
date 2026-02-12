@@ -1,6 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "./ui/alert-dialog"
+import { supabase } from "../lib/supabase"
+import type { ResumeExtracted } from "../lib/resume-types"
 import { MapPin, Building2, ChevronDown, ChevronUp, ExternalLink } from "lucide-react"
 
 export interface Job {
@@ -18,6 +30,7 @@ interface JobCardProps {
   job: Job
 }
 
+
 export function JobCard({ job }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -30,6 +43,53 @@ export function JobCard({ job }: JobCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  }
+
+  const [showDialog, setShowDialog] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [thankYou, setThankYou] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+  }
+
+  async function handleResumeUpload(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setUploading(true);
+    setError(null);
+    const file = selectedFile;
+    if (!file) {
+      setError("Please select a PDF file.");
+      setUploading(false);
+      return;
+    }
+    const formData = new FormData();
+    formData.append("pdf", file);
+    try {
+      const res = await fetch("/api/resume", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Failed to extract resume.");
+      const data: ResumeExtracted = await res.json();
+      // Print resume details to console
+      console.log("Extracted Resume:", data);
+      // Save to Supabase (candidate table)
+      await supabase.from("candidate").insert([
+        {
+          ...data,
+        },
+      ]);
+      setThankYou(true);
+    } catch (err: any) {
+      setError(err.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -87,26 +147,100 @@ export function JobCard({ job }: JobCardProps) {
         </div>
 
         {/* Actions */}
-        {job.apply_link && (
-          <div className="flex flex-wrap items-center gap-4 pt-3 mt-auto border-t border-border/50">
-            <a
-              href={job.apply_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] transition-all whitespace-nowrap"
-            >
-              Apply Now
-            </a>
-            <a
-              href={job.apply_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all whitespace-nowrap"
-            >
-              View Details <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
-        )}
+        {/* Apply Now & Resume Upload */}
+        <div className="flex flex-wrap items-center gap-4 pt-3 mt-auto border-t border-border/50">
+          <AlertDialog
+            open={showDialog}
+            onOpenChange={(open) => {
+              setShowDialog(open);
+              if (!open) {
+                setThankYou(false);
+                setSelectedFile(null);
+                setError(null);
+              }
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <button
+                className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] transition-all whitespace-nowrap"
+                onClick={() => setShowDialog(true)}
+              >
+                Apply Now
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Upload Your Resume</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <span className="block mb-2">Please upload your resume in PDF format.</span>
+                  <span className="block text-xs text-muted-foreground mb-2">We will extract your details and save them securely.</span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {thankYou ? (
+                <>
+                  <button
+                    className="absolute top-4 right-4 text-2xl text-red-500 bg-transparent border-none cursor-pointer"
+                    aria-label="Close"
+                    style={{ zIndex: 10 }}
+                    onClick={() => setShowDialog(false)}
+                  >
+                    ✖
+                  </button>
+                  <div className="py-6 flex flex-col items-center">
+                    <span className="text-green-600 text-2xl mb-2">✅</span>
+                    <div className="font-semibold text-green-700 mt-2">Thank you! Your resume has been uploaded.</div>
+                      <button
+                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg font-bold shadow hover:bg-blue-700 transition"
+                        onClick={() => window.open('https://josh-virid.vercel.app/record/14uooko4', '_blank')}
+                      >
+                        Record Video
+                      </button>
+                  </div>
+                </>
+              ) : (
+                <form onSubmit={handleResumeUpload} className="flex flex-col gap-4">
+                  <label htmlFor="resume-upload" className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-6 cursor-pointer hover:border-primary transition">
+                    <span className="text-4xl mb-2">📄</span>
+                    <span className="font-medium mb-1">Choose PDF file</span>
+                    <input
+                      id="resume-upload"
+                      type="file"
+                      accept="application/pdf"
+                      ref={fileInputRef}
+                      className="hidden"
+                      required
+                      onChange={handleFileChange}
+                    />
+                    <span className="text-xs text-muted-foreground mt-2">Only PDF files are supported</span>
+                  </label>
+                  {/* Show selected file name */}
+                  {selectedFile && (
+                    <div className="text-sm text-primary font-semibold text-center">{selectedFile.name}</div>
+                  )}
+                  {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={uploading}>Cancel</AlertDialogCancel>
+                    <button
+                      type="submit"
+                      className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-bold shadow hover:bg-primary/90 transition"
+                      disabled={uploading}
+                    >
+                      {uploading ? "Uploading..." : "Upload Resume"}
+                    </button>
+                  </AlertDialogFooter>
+                </form>
+              )}
+            </AlertDialogContent>
+          </AlertDialog>
+          <a
+            href={job.apply_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all whitespace-nowrap"
+          >
+            View Details <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
       </div>
     </div>
   )
