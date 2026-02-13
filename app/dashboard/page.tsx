@@ -85,7 +85,7 @@ export default function Dashboard() {
                   <td className="p-3 border-b text-foreground">{c.phone || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.location || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.headline || "-"}</td>
-                  <td className="p-3 border-b text-foreground">{c.skills || "-"}</td>
+                  <td className="p-3 border-b text-foreground max-w-[18ch] truncate" title={c.skills || "-"}>{c.skills || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.current_job_title || "-"}</td>
                   <td className="p-3 border-b text-foreground">
                     <button
