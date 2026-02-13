@@ -65,28 +65,25 @@ export default function Dashboard() {
           <table className="min-w-full bg-white rounded-2xl shadow-lg border border-border text-xs md:text-sm">
             <thead className="bg-primary/10">
               <tr>
-                <th className="p-3 border-b font-bold text-primary">ID</th>
-                <th className="p-3 border-b font-bold text-primary">Full Name</th>
-                <th className="p-3 border-b font-bold text-primary">Email</th>
-                <th className="p-3 border-b font-bold text-primary">Phone</th>
-                <th className="p-3 border-b font-bold text-primary">Location</th>
-                <th className="p-3 border-b font-bold text-primary">Headline</th>
-                <th className="p-3 border-b font-bold text-primary">Skills</th>
-                <th className="p-3 border-b font-bold text-primary">Current Job Title</th>
-                <th className="p-3 border-b font-bold text-primary">Actions</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Full Name</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Email</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Phone</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Location</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Headline</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Skills</th>
+                <th className="p-3 border-b font-bold text-primary text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               {candidates.map((c, i) => (
                 <tr key={c.id} className={i % 2 === 0 ? "bg-white" : "bg-primary/5"}>
-                  <td className="p-3 border-b text-foreground font-semibold">{c.id}</td>
                   <td className="p-3 border-b text-foreground">{c.full_name || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.email || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.phone || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.location || "-"}</td>
                   <td className="p-3 border-b text-foreground">{c.headline || "-"}</td>
                   <td className="p-3 border-b text-foreground max-w-[18ch] truncate" title={c.skills || "-"}>{c.skills || "-"}</td>
-                  <td className="p-3 border-b text-foreground">{c.current_job_title || "-"}</td>
+
                   <td className="p-3 border-b text-foreground">
                     <button
                       className="px-3 py-1 rounded bg-primary text-primary-foreground hover:bg-[#e06610] font-semibold text-xs"
