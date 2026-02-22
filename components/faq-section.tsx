@@ -41,11 +41,11 @@ export function FAQSection() {
   }
 
   return (
-    <section id="faqs" className="bg-[#FFFFFF] py-24 border-t border-muted/20">
+    <section id="faqs" className="bg-[#FFFFFF] py-20 border-t border-muted/20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0B1C53] mb-4">FAQs</h2>
-          <p className="text-lg text-muted-foreground">
+          <h2 className="text-4xl md:text-6xl font-bold text-[#0B1C53] mb-4">FAQs</h2>
+          <p className="text-xl text-slate-600">
             Answers to what matters most about starting your career through coordinators.pro.
           </p>
         </div>
@@ -63,7 +63,7 @@ export function FAQSection() {
                 onClick={() => toggleFAQ(index)}
                 className="w-full flex items-start justify-between p-6 text-left group"
               >
-                <span className="text-lg font-semibold text-[#0B1C53] pr-4">
+                <span className="text-xl font-semibold text-[#0B1C53] pr-4">
                   {faq.question}
                 </span>
                 <span className="mt-1 shrink-0">
@@ -81,7 +81,7 @@ export function FAQSection() {
                   openIndexes.includes(index) ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 )}
               >
-                <div className="p-6 pt-0 text-slate-600 leading-relaxed">
+                <div className="p-6 pt-0 text-slate-600 leading-relaxed text-lg">
                   {faq.answer}
                 </div>
               </div>

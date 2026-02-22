@@ -13,12 +13,12 @@ export default function Home() {
       <section className="bg-[#D8D1C1] pt-16 lg:pt-24 pb-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="order-2 lg:order-1 text-center lg:text-left">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-foreground leading-tight tracking-tight max-w-2xl mx-auto lg:mx-0 wrap-break-word">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[72px] font-normal text-foreground leading-[1.1] tracking-tight max-w-2xl mx-auto lg:mx-0 wrap-break-word">
               Find your next
               <br />
               <span className="text-foreground">career opportunity.</span>
             </h1>
-            <p className="mt-6 text-muted-foreground text-lg max-w-xl leading-relaxed mx-auto lg:mx-0">
+            <p className="mt-6 text-slate-600 text-lg md:text-[22px] font-medium max-w-xl leading-relaxed mx-auto lg:mx-0">
               Browse curated job listings from top companies—so you can find the perfect role, advance your career, and achieve your professional goals.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4">
@@ -31,10 +31,10 @@ export default function Home() {
             </div>
           </div>
           <div className="order-1 lg:order-2">
-            <img 
-              src="/hero.png" 
-              alt="Professional career growth" 
-              className="z-10 w-full h-auto max-w-lg mx-auto drop-shadow-2xl"
+            <img
+              src="/hero.png"
+              alt="Professional career growth"
+              className="z-10 w-full h-auto max-w-2xl mx-auto drop-shadow-2xl"
             />
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="space-y-12 lg:pt-4">
+            <div className="space-y-10 lg:pt-4">
               <div className="flex gap-6">
                 <div className="mt-1 shrink-0">
                   <ArrowUpRight className="text-primary w-8 h-8" />
@@ -97,25 +97,25 @@ export default function Home() {
       </section>
 
       {/* Jobs Section */}
-      <section id="jobs" className="bg-card py-24">
+      <section id="jobs" className="bg-card py-8">
         <div className="max-w-7xl mx-auto px-6 md:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-              <h2 className="text-3xl font-semibold text-foreground">Latest Openings</h2>
-              <p className="mt-2 text-muted-foreground">Find the role that matches your ambition.</p>
+              <h2 className="text-4xl md:text-5xl lg:text-7xl font-normal text-foreground leading-[1.1] mb-4">Latest Openings</h2>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">Find the role that matches your ambition.</p>
             </div>
-          
+
           </div>
           <JobsList />
         </div>
       </section>
 
       {/* How it Works Section */}
-      <section id="how-it-works" className="bg-white py-24 border-t border-muted/20">
+      <section id="how-it-works" className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">How it works</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-semibold text-foreground mb-4">How it works</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               A simple, streamlined process to connect you with the support you need.
             </p>
           </div>
@@ -138,8 +138,8 @@ export default function Home() {
                 <div className="w-24 h-24 rounded-full border-2 border-primary flex items-center justify-center text-3xl font-semibold text-primary mb-8 bg-white shadow-sm">
                   1
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4 px-4">Discover</h3>
-                <p className="text-muted-foreground leading-relaxed px-2">
+                <h3 className="text-2xl font-bold text-foreground mb-4 px-4">Discover</h3>
+                <p className="text-lg text-slate-600 leading-relaxed px-2">
                   Browse our exclusively curated list of high-growth roles and innovative companies.
                 </p>
               </div>
@@ -149,8 +149,8 @@ export default function Home() {
                 <div className="w-24 h-24 rounded-full border-2 border-primary flex items-center justify-center text-3xl font-semibold text-primary mb-8 bg-white shadow-sm">
                   2
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4 px-4">Apply with ease</h3>
-                <p className="text-muted-foreground leading-relaxed px-2">
+                <h3 className="text-2xl font-bold text-foreground mb-4 px-4">Apply with ease</h3>
+                <p className="text-lg text-slate-600 leading-relaxed px-2">
                   No complex portals. Apply directly with your profile or resume in just a few clicks.
                 </p>
               </div>
@@ -160,8 +160,8 @@ export default function Home() {
                 <div className="w-24 h-24 rounded-full border-2 border-primary flex items-center justify-center text-3xl font-semibold text-primary mb-8 bg-white shadow-sm">
                   3
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-4 px-4">Scale up</h3>
-                <p className="text-muted-foreground leading-relaxed px-2">
+                <h3 className="text-2xl font-bold text-foreground mb-4 px-4">Scale up</h3>
+                <p className="text-lg text-slate-600 leading-relaxed px-2">
                   Interact directly with teams and start your journey toward professional excellence.
                 </p>
               </div>
@@ -173,7 +173,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="bg-[#0B1C53] py-20 overflow-hidden relative">
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-black/5 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-8 leading-tight"> Ready to build the future you deserve?</h2>
           <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
@@ -216,7 +216,7 @@ export default function Home() {
                 </Link>
               </nav>
             </div>
-            
+
             <div className="flex flex-col items-start md:items-end">
               <h3 className="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider">Our socials</h3>
               <div className="flex flex-col gap-4">
@@ -235,7 +235,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <p>© 2026 coordinators.pro. All rights reserved.</p>
             <div className="flex gap-6">

@@ -46,12 +46,12 @@ export function Navbar() {
           </div>
           
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-12 font-medium text-md">
+          <nav className="hidden md:flex items-center gap-12 font-medium text-lg">
             {navLinks.map((link) => (
               <Link 
                 key={link.name}
                 href={link.href} 
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+                className="text-slate-600 hover:text-primary transition-colors font-medium"
               >
                 {link.name}
               </Link>
