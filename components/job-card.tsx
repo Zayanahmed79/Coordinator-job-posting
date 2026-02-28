@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { MapPin, Building2, ChevronDown, ChevronUp, ExternalLink } from "lucide-react"
+import { MapPin, Building2, ExternalLink } from "lucide-react"
+import { ResumeUploadModal } from "./resume-upload-modal"
 
 export interface Job {
   id: string
@@ -20,6 +21,7 @@ interface JobCardProps {
 
 export function JobCard({ job }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   const truncateDescription = (text: string, maxLength = 150) => {
     if (!text) return ""
@@ -89,25 +91,22 @@ export function JobCard({ job }: JobCardProps) {
         {/* Actions */}
         {job.apply_link && (
           <div className="flex flex-wrap items-center gap-4 pt-3 mt-auto border-t border-border/50">
-            <a
-              href={job.apply_link}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => setIsUploadModalOpen(true)}
               className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground text-md font-bold rounded-full hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] transition-all whitespace-nowrap"
             >
               Apply Now
-            </a>
-            <a
-              href={job.apply_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-md font-bold text-primary hover:gap-3 transition-all whitespace-nowrap"
-            >
-              View Details <ExternalLink className="w-4 h-4" />
-            </a>
+            </button>
           </div>
         )}
       </div>
+
+      <ResumeUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        jobId={job.id}
+        jobTitle={job.title}
+      />
     </div>
   )
 }
