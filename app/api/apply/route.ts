@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
         // 1. Extract resume details
         const extractFormData = new FormData()
-        extractFormData.append('pdf', file)
+        extractFormData.append('file', file)
 
         const extractRes = await fetch('https://unitzero-4fi4q.ondigitalocean.app/api/resume/extract', {
             method: 'POST',
