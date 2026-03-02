@@ -17,6 +17,7 @@ export type JobListing = {
     company: string | null
     apply_link: string | null
     job_type: string
+    job_id: number | null
     created_at: string
 }
 
@@ -72,6 +73,7 @@ export async function createJob(formData: {
     job_type: string
     location?: string
     apply_link?: string
+    job_id?: string | number
     description?: string
 }): Promise<ActionResponse<JobListing>> {
     const validation = validateJobInput(formData)
@@ -85,6 +87,7 @@ export async function createJob(formData: {
         job_type: formData.job_type.toLowerCase().trim(),
         location: formData.location ? sanitizeString(formData.location) : null,
         apply_link: formData.apply_link ? formData.apply_link.trim() : null,
+        job_id: formData.job_id ? Number(formData.job_id) : null,
         description: formData.description ? sanitizeString(formData.description) : null,
     }
 

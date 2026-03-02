@@ -173,6 +173,11 @@ export function JobTable({
                                             <span className="bg-background px-2.5 py-1 rounded-md border border-border/50">
                                                 {formatDate(job.created_at)}
                                             </span>
+                                            {job.job_id && (
+                                                <span className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-md border border-primary/20 font-bold">
+                                                    ID: {job.job_id}
+                                                </span>
+                                            )}
                                         </div>
 
                                         {job.description && (
