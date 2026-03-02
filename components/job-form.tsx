@@ -47,7 +47,7 @@ export function JobForm({ onJobAdded }: JobFormProps) {
         location: '',
         company: '',
         job_type: '',
-        job_id: '',
+        pipline_id: '',
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +70,7 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                     location: '',
                     company: '',
                     job_type: '',
-                    job_id: '',
+                    pipline_id: '',
                 })
             } else {
                 toast.error(result.error)
@@ -166,16 +166,16 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                     </div>
 
                     <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="job_id" className="text-sm font-medium flex items-center gap-2">
+                        <Label htmlFor="pipline_id" className="text-sm font-medium flex items-center gap-2">
                             <Hash className="size-3.5 text-muted-foreground" />
-                            Job ID
+                            Pipline ID
                         </Label>
                         <Input
-                            id="job_id"
+                            id="pipline_id"
                             type="number"
                             placeholder="e.g. 123456"
-                            value={formData.job_id}
-                            onChange={(e) => updateField('job_id', e.target.value)}
+                            value={formData.pipline_id}
+                            onChange={(e) => updateField('pipline_id', e.target.value)}
                             className="h-11 bg-background border-border/50 rounded-xl"
                         />
                     </div>

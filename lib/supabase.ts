@@ -13,5 +13,6 @@ export type JobListing = {
   company: string
   apply_link: string
   type: string
+  pipline_id: number | null
   created_at: string
 }
