@@ -78,7 +78,7 @@ export function JobCard({ job }: JobCardProps) {
                 {job.description.length > 150 && (
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="ml-1 inline-flex items-center gap-0.5 text-md font-semibold text-primary hover:underline transition-all"
+                    className="ml-1 inline-flex items-center gap-0.5 text-md font-semibold text-secondary hover:underline transition-all"
                   >
                     {isExpanded ? "Show less" : "Read more"}
                   </button>
