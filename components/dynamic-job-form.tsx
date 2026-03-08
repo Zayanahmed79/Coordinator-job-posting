@@ -59,7 +59,7 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
 
         try {
             const submitData = new FormData()
-            submitData.append('jobId', job.id)
+            submitData.append('jobId', String(job.pipline_id || job.id))
             submitData.append('jobTitle', job.title)
 
             // Personal Info
