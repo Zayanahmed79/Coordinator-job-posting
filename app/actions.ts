@@ -9,6 +9,27 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+export async function getJobById(id: string): Promise<JobListing | null> {
+    const isNumeric = /^\d+$/.test(id)
+
+    let query = supabase.from('job_listings').select('*')
+
+    if (isNumeric) {
+        query = query.eq('pipline_id', Number(id))
+    } else {
+        query = query.eq('id', id)
+    }
+
+    const { data, error } = await query.single()
+
+    if (error) {
+        console.error('Error fetching job by ID:', error)
+        return null
+    }
+
+    return data
+}
+
 export type JobListing = {
     id: string
     title: string
@@ -18,7 +39,9 @@ export type JobListing = {
     apply_link: string | null
     job_type: string
     pipline_id: number | null
+    experience: string | null
     created_at: string
+    questions?: any[]
 }
 
 export type ActionResponse<T = void> =
@@ -32,37 +55,17 @@ function sanitizeString(str: string): string {
 }
 
 function validateJobInput(data: {
-    title: string
+    title?: string
     company?: string
-    job_type: string
+    job_type?: string
     location?: string
     apply_link?: string
     description?: string
 }): { valid: true } | { valid: false; error: string } {
-    if (!data.title || data.title.trim().length < 2) {
-        return { valid: false, error: 'Job title must be at least 2 characters' }
-    }
-    if (data.title.length > 200) {
+    // Basic validation for manual entries, 
+    // but allowing empty fields for Quick Add as they come from API
+    if (data.title && data.title.length > 200) {
         return { valid: false, error: 'Job title must be less than 200 characters' }
-    }
-    if (data.company && data.company.length > 200) {
-        return { valid: false, error: 'Company name must be less than 200 characters' }
-    }
-    if (!data.job_type || !VALID_JOB_TYPES.includes(data.job_type.toLowerCase())) {
-        return { valid: false, error: 'Please select a valid job type' }
-    }
-    if (data.location && data.location.length > 200) {
-        return { valid: false, error: 'Location must be less than 200 characters' }
-    }
-    if (data.apply_link && data.apply_link.trim().length > 0) {
-        try {
-            new URL(data.apply_link)
-        } catch {
-            return { valid: false, error: 'Please enter a valid URL for the application link' }
-        }
-    }
-    if (data.description && data.description.length > 10000) {
-        return { valid: false, error: 'Description must be less than 10,000 characters' }
     }
     return { valid: true }
 }
@@ -75,6 +78,7 @@ export async function createJob(formData: {
     apply_link?: string
     pipline_id?: string | number
     description?: string
+    questions?: any[]
 }): Promise<ActionResponse<JobListing>> {
     const validation = validateJobInput(formData)
     if (!validation.valid) {
@@ -88,7 +92,8 @@ export async function createJob(formData: {
         location: formData.location ? sanitizeString(formData.location) : null,
         apply_link: formData.apply_link ? formData.apply_link.trim() : null,
         pipline_id: formData.pipline_id ? Number(formData.pipline_id) : null,
-        description: formData.description ? sanitizeString(formData.description) : null,
+        description: formData.description ? formData.description.trim() : null,
+        questions: formData.questions || [],
     }
 
     const { data, error } = await supabase
@@ -104,6 +109,29 @@ export async function createJob(formData: {
 
     revalidateTag('jobs', 'max')
     return { success: true, data }
+}
+
+export async function fetchRecruiterflowJob(jobId: string): Promise<ActionResponse<any>> {
+    try {
+        const response = await fetch(`https://api.recruiterflow.com/api/external/job?job_id=${jobId}`, {
+            headers: {
+                'RF-Api-Key': '31292c5fcc5dd07123b80a8fe7cc2616',
+                'Accept': 'application/json'
+            }
+        })
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error('Recruiterflow API Error:', response.status, errorText)
+            return { success: false, error: `Failed to fetch job details (Status: ${response.status}). Please check the Job ID.` }
+        }
+
+        const data = await response.json()
+        return { success: true, data }
+    } catch (error) {
+        console.error('Recruiterflow error:', error)
+        return { success: false, error: 'Failed to connect to Recruiterflow' }
+    }
 }
 
 export async function deleteJob(id: string): Promise<ActionResponse> {

@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useState, useTransition } from 'react'
-import { createJob, type JobListing } from '@/app/actions'
+import { createJob, fetchRecruiterflowJob, type JobListing } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -41,181 +41,115 @@ type JobFormProps = {
 
 export function JobForm({ onJobAdded }: JobFormProps) {
     const [isPending, startTransition] = useTransition()
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        location: '',
-        company: '',
-        job_type: '',
-        pipline_id: '',
-    })
+    const [jobId, setJobId] = useState('')
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!formData.title.trim() || !formData.job_type) {
-            toast.error('Please fill in all required fields')
+        if (!jobId.trim()) {
+            toast.error('Please enter a Job ID')
             return
         }
 
         startTransition(async () => {
-            const result = await createJob(formData)
+            // 1. Fetch details from Recruiterflow
+            const fetchResult = await fetchRecruiterflowJob(jobId)
 
-            if (result.success) {
+            if (!fetchResult.success) {
+                toast.error(fetchResult.error)
+                return
+            }
+
+            const RecruiterflowJob = fetchResult.data
+
+            // 2. Prepare data for our DB
+            const rawJobType = RecruiterflowJob.job_type || 'contract'
+            const jobTypeString = typeof rawJobType === 'object' ? (rawJobType.name || rawJobType.label || 'contract') : String(rawJobType)
+
+            const jobData = {
+                title: RecruiterflowJob.title,
+                description: RecruiterflowJob.about_position || RecruiterflowJob.description || '',
+                location: RecruiterflowJob.location || 'Remote',
+                company: RecruiterflowJob.company?.name || RecruiterflowJob.company || 'Coordinator',
+                job_type: jobTypeString.toLowerCase(),
+                pipline_id: jobId,
+                questions: RecruiterflowJob.application_form || RecruiterflowJob.questions || [],
+                // Recruiterflow sometimes has apply_link, otherwise we point to our own page
+                apply_link: RecruiterflowJob.apply_link || `https://careers.coordinators.pro/jobs/${jobId}`
+            }
+
+            // 3. Create job in our DB
+            const createResult = await createJob(jobData)
+
+            if (createResult.success) {
                 toast.success('Job listing created successfully')
-                onJobAdded(result.data)
-                setFormData({
-                    title: '',
-                    description: '',
-                    location: '',
-                    company: '',
-                    job_type: '',
-                    pipline_id: '',
-                })
+                onJobAdded(createResult.data)
+                setJobId('')
             } else {
-                toast.error(result.error)
+                toast.error(createResult.error)
             }
         })
     }
 
-    const updateField = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }))
-    }
-
     return (
-        <div className="bg-card rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-border/50">
+        <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border/50 transition-all hover:shadow-md">
+            <div className="px-6 py-5 border-b border-border/50 bg-muted/20">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
                         <Plus className="size-5" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-foreground">Add New Job</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Fill in the details to create a new listing
+                        <h2 className="text-lg font-bold text-foreground tracking-tight">Quick Add Job</h2>
+                        <p className="text-sm text-muted-foreground font-medium">
+                            Enter the Recruiterflow Job ID to automatically create a listing
                         </p>
                     </div>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid gap-5 sm:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
-                            <Briefcase className="size-3.5 text-muted-foreground" />
-                            Job Title <span className="text-primary">*</span>
+            <form onSubmit={handleSubmit} className="p-8">
+                <div className="flex flex-col sm:flex-row items-end gap-4">
+                    <div className="flex-1 space-y-2 w-full">
+                        <Label htmlFor="jobId" className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 px-1">
+                            <Hash className="size-3.5 text-primary" />
+                            Recruiterflow Job ID
                         </Label>
                         <Input
-                            id="title"
-                            placeholder="e.g. Senior Software Engineer"
-                            value={formData.title}
-                            onChange={(e) => updateField('title', e.target.value)}
-                            className="h-11 bg-background border-border/50 rounded-xl"
-                            required
+                            id="jobId"
+                            placeholder="e.g. 102"
+                            value={jobId}
+                            onChange={(e) => setJobId(e.target.value)}
+                            className="h-14 bg-background border-border/80 rounded-2xl text-lg font-medium shadow-sm focus:ring-4 focus:ring-primary/5 transition-all"
+                            autoComplete="off"
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="company" className="text-sm font-medium flex items-center gap-2">
-                            <Building2 className="size-3.5 text-muted-foreground" />
-                            Company
-                        </Label>
-                        <Input
-                            id="company"
-                            placeholder="e.g. Acme Inc."
-                            value={formData.company}
-                            onChange={(e) => updateField('company', e.target.value)}
-                            className="h-11 bg-background border-border/50 rounded-xl"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                            <MapPin className="size-3.5 text-muted-foreground" />
-                            Location
-                        </Label>
-                        <Input
-                            id="location"
-                            placeholder="e.g. San Francisco, CA or Remote"
-                            value={formData.location}
-                            onChange={(e) => updateField('location', e.target.value)}
-                            className="h-11 bg-background border-border/50 rounded-xl"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="job_type" className="text-sm font-medium flex items-center gap-2">
-                            <Clock className="size-3.5 text-muted-foreground" />
-                            Job Type <span className="text-primary">*</span>
-                        </Label>
-                        <Select
-                            value={formData.job_type}
-                            onValueChange={(value) => updateField('job_type', value)}
-                        >
-                            <SelectTrigger className="h-11 w-full bg-background border-border/50 rounded-xl">
-                                <SelectValue placeholder="Select job type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {JOB_TYPES.map((type) => (
-                                    <SelectItem key={type.value} value={type.value}>
-                                        {type.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="pipline_id" className="text-sm font-medium flex items-center gap-2">
-                            <Hash className="size-3.5 text-muted-foreground" />
-                            Pipline ID
-                        </Label>
-                        <Input
-                            id="pipline_id"
-                            type="number"
-                            placeholder="e.g. 123456"
-                            value={formData.pipline_id}
-                            onChange={(e) => updateField('pipline_id', e.target.value)}
-                            className="h-11 bg-background border-border/50 rounded-xl"
-                        />
-                    </div>
-
-                    <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="description" className="text-sm font-medium flex items-center gap-2">
-                            <FileText className="size-3.5 text-muted-foreground" />
-                            Description
-                        </Label>
-                        <Textarea
-                            id="description"
-                            placeholder="Enter job description, requirements, responsibilities..."
-                            value={formData.description}
-                            onChange={(e) => updateField('description', e.target.value)}
-                            className="min-h-28 resize-y bg-background border-border/50 rounded-xl"
-                        />
-                    </div>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between pt-5 border-t border-border/50">
-                    <p className="text-xs text-muted-foreground">
-                        <span className="text-primary">*</span> Required fields
-                    </p>
                     <Button
                         type="submit"
                         disabled={isPending}
-                        className="rounded-full px-8 h-11 font-medium"
+                        className="h-14 rounded-2xl px-10 font-bold text-base shadow-lg shadow-primary/20 transition-all active:scale-[0.98] w-full sm:w-auto"
                     >
                         {isPending ? (
                             <>
-                                <Loader2 className="size-4 animate-spin" />
+                                <Loader2 className="size-5 animate-spin mr-2" />
                                 Creating...
                             </>
                         ) : (
                             <>
-                                <Plus className="size-4" />
-                                Add Job Listing
+                                <Plus className="size-5 mr-2" />
+                                Add Job
                             </>
                         )}
                     </Button>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10">
+                    <p className="text-[11px] text-primary/80 font-bold leading-none">
+                        PRO TIP:
+                    </p>
+                    <p className="text-[11px] text-muted-foreground font-medium">
+                        This will automatically pull the title, description, and job questions from Recruiterflow.
+                    </p>
                 </div>
             </form>
         </div>

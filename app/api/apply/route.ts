@@ -3,42 +3,37 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
     try {
         const formData = await request.formData()
-        const file = formData.get('pdf') as File
+
         const jobId = formData.get('jobId') as string
         const jobTitle = formData.get('jobTitle') as string
+        const firstName = formData.get('firstName') as string
+        const lastName = formData.get('lastName') as string
+        const email = formData.get('email') as string
+        const phone = formData.get('phone') as string
+        const videoLink = formData.get('videoLink') as string
+        const linkedin = formData.get('linkedin') as string
+        const locationStr = formData.get('location') as string
+        const answersStr = formData.get('answers') as string
+        const experiencesStr = formData.get('experiences') as string
 
-        if (!file) {
-            return NextResponse.json(
-                { error: 'Resume PDF is required' },
-                { status: 400 }
-            )
-        }
+        const location = locationStr ? JSON.parse(locationStr) : {}
+        const answers = answersStr ? JSON.parse(answersStr) : {}
+        const experiences = experiencesStr ? JSON.parse(experiencesStr) : []
 
-        // 1. Extract resume details
-        const extractFormData = new FormData()
-        extractFormData.append('file', file)
-
-        const extractRes = await fetch('https://unitzero-4fi4q.ondigitalocean.app/api/resume/extract', {
-            method: 'POST',
-            body: extractFormData,
-        })
-
-        if (!extractRes.ok) {
-            const errorText = await extractRes.text()
-            console.error('Extraction error:', errorText)
-            return NextResponse.json(
-                { error: 'Failed to extract details from resume. Please try again.' },
-                { status: extractRes.status }
-            )
-        }
-
-        const extractedData = await extractRes.json()
-
-        // 2. Post to webhook
+        // 1. Post to webhook
         const webhookPayload = {
-            ...extractedData,
             job_id: jobId,
             job_title: jobTitle,
+            first_name: firstName,
+            last_name: lastName,
+            full_name: `${firstName} ${lastName}`,
+            email: email,
+            phone: phone,
+            video_recording_link: videoLink,
+            linkedin_profile: linkedin,
+            location: location,
+            additional_answers: answers,
+            experiences: experiences,
             source: 'Job Board Application',
             timestamp: new Date().toISOString(),
         }
@@ -59,7 +54,7 @@ export async function POST(request: Request) {
             )
         }
 
-        return NextResponse.json({ success: true, data: extractedData })
+        return NextResponse.json({ success: true })
     } catch (error) {
         console.error('Apply error:', error)
         return NextResponse.json(

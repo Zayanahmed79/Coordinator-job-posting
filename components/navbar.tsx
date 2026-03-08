@@ -5,7 +5,11 @@ import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function Navbar() {
+interface NavbarProps {
+  isLight?: boolean
+}
+
+export function Navbar({ isLight = true }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -32,7 +36,7 @@ export function Navbar() {
 
   return (
     <>
-      <header 
+      <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 sm:py-5 py-3",
           isScrolled ? "bg-white shadow-sm" : "bg-transparent"
@@ -41,17 +45,29 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/">
-              <img src="/logo.png" alt="coordinators.pro" className="sm:h-16 h-12 w-auto" />
+              <img
+                src="/logo.png"
+                alt="coordinators.pro"
+                className={cn(
+                  "sm:h-16 h-12 w-auto transition-all",
+                  (!isScrolled && !isLight) && "brightness-0 invert"
+                )}
+              />
             </Link>
           </div>
-          
+
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-12 font-medium text-lg">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.name}
-                href={link.href} 
-                className="text-slate-600 hover:text-primary transition-colors font-medium"
+                href={link.href}
+                className={cn(
+                  "transition-colors font-medium",
+                  isScrolled
+                    ? "text-slate-600 hover:text-primary"
+                    : (isLight ? "text-slate-600 hover:text-primary" : "text-white/90 hover:text-white")
+                )}
               >
                 {link.name}
               </Link>
@@ -59,8 +75,13 @@ export function Navbar() {
           </nav>
 
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden p-2 text-foreground"
+          <button
+            className={cn(
+              "md:hidden p-2 transition-colors",
+              isScrolled
+                ? "text-foreground"
+                : (isLight ? "text-foreground" : "text-white")
+            )}
             onClick={() => setIsMenuOpen(true)}
           >
             <Menu size={28} />
@@ -69,7 +90,7 @@ export function Navbar() {
       </header>
 
       {/* Mobile Menu Overlay */}
-      <div 
+      <div
         className={cn(
           "fixed inset-0 z-60 bg-white transition-transform duration-300 md:hidden",
           isMenuOpen ? "translate-x-0" : "translate-x-full"
@@ -78,18 +99,18 @@ export function Navbar() {
         <div className="p-3">
           <div className="flex items-center justify-between mb-12">
             <img src="/logo.png" alt="coordinators.pro" className="h-12 w-auto" />
-            <button 
+            <button
               className=" text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               <X size={28} />
-            </button> 
+            </button>
           </div>
           <nav className="flex flex-col gap-8">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.name}
-                href={link.href} 
+                href={link.href}
                 className="text-2xl font-medium text-foreground hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >

@@ -151,16 +151,29 @@ export function JobTable({
                                                 </div>
                                             </div>
 
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 transition-colors"
-                                                onClick={() => setDeleteId(job.id)}
-                                                title="Delete listing"
-                                            >
-                                                <Trash2 className="size-4" />
-                                                <span className="sr-only">Delete</span>
-                                            </Button>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-2 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-bold"
+                                                    asChild
+                                                >
+                                                    <a href={`/jobs/${job.pipline_id || job.id}`} target="_blank" rel="noopener noreferrer">
+                                                        <ExternalLink className="size-3.5 mr-1" />
+                                                        View
+                                                    </a>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                                    onClick={() => setDeleteId(job.id)}
+                                                    title="Delete listing"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                    <span className="sr-only">Delete</span>
+                                                </Button>
+                                            </div>
                                         </div>
 
                                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">

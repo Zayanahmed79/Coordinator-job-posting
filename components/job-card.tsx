@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { MapPin, Building2, ExternalLink } from "lucide-react"
-import { ResumeUploadModal } from "./resume-upload-modal"
+import Link from "next/link"
+import { MapPin, Building2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export interface Job {
   id: string
@@ -13,7 +14,9 @@ export interface Job {
   apply_link: string
   type: string
   pipline_id: number | null
+  experience: string | null
   created_at: string
+  questions?: any[]
 }
 
 interface JobCardProps {
@@ -22,12 +25,19 @@ interface JobCardProps {
 
 export function JobCard({ job }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
-  const truncateDescription = (text: string, maxLength = 150) => {
+  const stripHtml = (html: string) => {
+    if (typeof document === 'undefined') return html
+    const tmp = document.createElement("DIV")
+    tmp.innerHTML = html
+    return tmp.textContent || tmp.innerText || ""
+  }
+
+  const truncateDescription = (text: string, maxLength = 160) => {
     if (!text) return ""
-    if (text.length <= maxLength) return text
-    return text.slice(0, maxLength).trim() + "..."
+    const plainText = stripHtml(text)
+    if (plainText.length <= maxLength) return plainText
+    return plainText.slice(0, maxLength).trim() + "..."
   }
 
   const formatDate = (dateString: string) => {
@@ -74,40 +84,59 @@ export function JobCard({ job }: JobCardProps) {
           {/* Description */}
           {job.description && (
             <div className="relative">
-              <p className="text-lg text-slate-600 leading-relaxed">
-                {isExpanded ? job.description : truncateDescription(job.description)}
-                {job.description.length > 150 && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="ml-1 inline-flex items-center gap-0.5 text-md font-semibold text-secondary hover:underline transition-all"
-                  >
-                    {isExpanded ? "Show less" : "Read more"}
-                  </button>
+              <div
+                className={cn(
+                  "text-lg text-[#1A202C] leading-relaxed transition-all duration-300",
+                  !isExpanded && "max-h-[100px] overflow-hidden relative"
                 )}
-              </p>
+                dangerouslySetInnerHTML={{
+                  __html: (() => {
+                    if (typeof document === "undefined") return ""
+                    if (isExpanded) {
+                      // Show full decoded HTML when expanded
+                      const txt = document.createElement("textarea")
+                      txt.innerHTML = job.description
+                      const decoded = txt.value
+                      if (decoded.includes("&lt;") || decoded.includes("&gt;")) {
+                        txt.innerHTML = decoded
+                        return txt.value
+                      }
+                      return decoded
+                    }
+                    // Show truncated plain text preview
+                    return truncateDescription(job.description)
+                  })()
+                }}
+              />
+              {!isExpanded && job.description.length > 160 && (
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white to-transparent pointer-events-none" />
+              )}
+              {job.description.length > 160 && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
+                  className="mt-2 inline-flex items-center gap-0.5 text-md font-semibold text-secondary hover:underline transition-all relative z-10"
+                >
+                  {isExpanded ? "Show less" : "Read more"}
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        {job.apply_link && (
-          <div className="flex flex-wrap items-center gap-4 pt-3 mt-auto border-t border-border/50">
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground text-md font-bold rounded-full hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] transition-all whitespace-nowrap"
-            >
-              Apply Now
-            </button>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-4 pt-3 mt-auto border-t border-border/50">
+          <Link
+            href={`/jobs/${job.pipline_id || job.id}`}
+            className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground text-md font-bold rounded-full hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] transition-all whitespace-nowrap"
+          >
+            Apply Now
+          </Link>
+        </div>
       </div>
-
-      <ResumeUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        jobId={job.id}
-        jobTitle={job.title}
-      />
     </div>
   )
 }
