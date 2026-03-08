@@ -196,9 +196,9 @@ export function JobTable({
                                         {job.description && (
                                             <div className="flex-1">
                                                 <p className={`text-sm text-muted-foreground leading-relaxed ${!isExpanded ? 'line-clamp-3' : ''}`}>
-                                                    {job.description}
+                                                    {job.description.replace(/<[^>]*>/g, ' ')}
                                                 </p>
-                                                {job.description.length > 150 && (
+                                                {job.description.replace(/<[^>]*>/g, ' ').length > 150 && (
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleDescription(job.id)}

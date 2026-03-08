@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { MapPin, Briefcase, Share2, Facebook, Linkedin, ArrowRight, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { JobListing } from '@/app/actions'
@@ -82,7 +81,7 @@ export default function JobDetailPage() {
 
             {/* Header / Hero Section - DARK BLUE */}
             <div className="bg-[#1E3A5F] pt-40 pb-20">
-                <div className="max-w-5xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4 md:px-10">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                         <div className="space-y-6 max-w-2xl">
                             <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
@@ -161,7 +160,7 @@ export default function JobDetailPage() {
             </div>
 
             {/* Content Section - NO BOXES */}
-            <div className="max-w-5xl mx-auto px-4 py-20 md:py-28">
+            <div className="max-w-7xl mx-auto px-4 md:px-10 py-20 md:py-28">
                 <div className="grid lg:grid-cols-1">
                     <div className="max-w-none">
                         <style dangerouslySetInnerHTML={{
@@ -185,7 +184,7 @@ export default function JobDetailPage() {
                 </div>
 
                 {/* Apply Section - UNBOXED */}
-                <div id="apply-section" className="mt-24 pt-24 border-t-2 border-[#E0DBD6]/50">
+                <div id="apply-section" className="mt-12 pt-12 border-t border-[#E0DBD6]/50">
                     <DynamicJobForm job={job} />
                 </div>
             </div>
