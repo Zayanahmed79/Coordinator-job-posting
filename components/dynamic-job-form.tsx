@@ -110,7 +110,12 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
     // We want to filter these out of "Additional Questions" because we handle them separately
     const isStandardField = (q: any) => {
         const key = q.parts?.[0]?.key || ''
-        return key.startsWith('personal_info.') || key.startsWith('candidate_profile.resume') || q.type === 'experience'
+        const text = (q.text || q.label || q.question || '').toUpperCase()
+        return key.startsWith('personal_info.') || 
+               key.startsWith('candidate_profile.resume') || 
+               q.type === 'experience' ||
+               text.includes('VOCAROO') ||
+               text.includes('LOOM')
     }
 
     const additionalQuestions = job.questions?.filter(q => !isStandardField(q)) || []
@@ -148,28 +153,12 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
                     <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A5F] tracking-tight">Apply To Job</h2>
                     <p className="text-[#5A6A7A] text-lg leading-relaxed max-w-2xl">
                         Please fill in your details below to submit your application.
-                        Make sure to record your introduction video using the button below.
+                        A Loom video recording link is required for this application.
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-12">
                     {/* ... existing form content ... */}
-                    {/* Recording Button */}
-                    <div className="bg-[#1E3A5F] rounded-xl p-8 text-white shadow-xl flex flex-col items-center text-center gap-6">
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-bold">Record Your Introduction</h3>
-                            <p className="text-white/70 text-sm max-w-md">
-                                Stand out by recording a quick introduction. After recording, copy the URL and paste it in the field below.
-                            </p>
-                        </div>
-                        <Button
-                            type="button"
-                            onClick={() => window.open('https://recordings.coordinators.pro/record/x1zp6jaz', '_blank')}
-                            className="bg-[#F47521] hover:bg-[#D9661D] text-white px-8 h-12 rounded-lg font-bold border-0"
-                        >
-                            Start Recording Now
-                        </Button>
-                    </div>
 
                     {/* Personal Information */}
                     <div className="bg-white rounded-xl border border-border/50 overflow-hidden shadow-sm">
@@ -270,6 +259,17 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
                                             required
                                         />
                                     </div>
+                                </div>
+
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-slate-600 font-bold text-xs uppercase tracking-wider">Loom Video Recording Link *</Label>
+                                    <Input
+                                        placeholder="Paste your Loom recording link here"
+                                        value={formData.videoLink}
+                                        onChange={e => setFormData(p => ({ ...p, videoLink: e.target.value }))}
+                                        className="bg-slate-50/50 border-slate-200 h-10 focus-visible:ring-[#F47521]"
+                                        required
+                                    />
                                 </div>
 
 
