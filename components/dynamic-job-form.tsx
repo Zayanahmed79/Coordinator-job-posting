@@ -115,7 +115,9 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
                key.startsWith('candidate_profile.resume') || 
                q.type === 'experience' ||
                text.includes('VOCAROO') ||
-               text.includes('LOOM')
+               text.includes('LOOM') ||
+               text.includes('AUDIO OR VIDEO') ||
+               text.includes('RECORD A SHORT')
     }
 
     const additionalQuestions = job.questions?.filter(q => !isStandardField(q)) || []
@@ -259,17 +261,6 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
                                             required
                                         />
                                     </div>
-                                </div>
-
-                                <div className="space-y-2 md:col-span-2">
-                                    <Label className="text-slate-600 font-bold text-xs uppercase tracking-wider">Loom Video Recording Link *</Label>
-                                    <Input
-                                        placeholder="Paste your Loom recording link here"
-                                        value={formData.videoLink}
-                                        onChange={e => setFormData(p => ({ ...p, videoLink: e.target.value }))}
-                                        className="bg-slate-50/50 border-slate-200 h-10 focus-visible:ring-[#F47521]"
-                                        required
-                                    />
                                 </div>
 
 
