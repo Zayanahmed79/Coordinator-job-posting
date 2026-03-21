@@ -80,6 +80,7 @@ export function DynamicJobForm({ job }: DynamicJobFormProps) {
             submitData.append('experiences', JSON.stringify(experiences))
 
             // Dynamic Answers
+            
             submitData.append('answers', JSON.stringify(answers))
 
             const response = await fetch('/api/apply', {
