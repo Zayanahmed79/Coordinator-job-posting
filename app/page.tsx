@@ -10,7 +10,7 @@ export default function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-[#D8D1C1] pt-16 lg:pt-24 pb-16 overflow-hidden">
+      <section className="bg-[#D8D1C1] pt-16 lg:pt-20 md:pb-0 pb-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="order-2 lg:order-1 text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[72px] font-normal text-foreground leading-[1.1] tracking-tight max-w-2xl mx-auto lg:mx-0 wrap-break-word">
@@ -30,12 +30,13 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="order-1 lg:order-2">
+          <div className="order-1 lg:order-2 relative">
             <img
-              src="/hero.png"
+              src="/Regina3.png"
               alt="Professional career growth"
-              className="z-10 w-full h-auto max-w-2xl mx-auto drop-shadow-2xl"
+              className="w-full h-auto max-w-2xl mx-auto drop-shadow-2xl"
             />
+            <div className="absolute bottom-0 left-0 right-0 h-48 z-20" style={{background: 'linear-gradient(to top, #D8D1C1 20%, rgba(216,209,193,0.85) 50%, transparent 100%)'}} />
           </div>
         </div>
       </section>
