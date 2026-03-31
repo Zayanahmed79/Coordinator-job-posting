@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils"
 
 interface NavbarProps {
   isLight?: boolean
+  forceWhite?: boolean
 }
 
-export function Navbar({ isLight = true }: NavbarProps) {
+export function Navbar({ isLight = true, forceWhite = false }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -39,7 +40,7 @@ export function Navbar({ isLight = true }: NavbarProps) {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 sm:py-5 py-3",
-          isScrolled ? "bg-white shadow-sm" : "bg-transparent"
+          (isScrolled || forceWhite) ? "bg-white shadow-sm" : "bg-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
@@ -64,7 +65,7 @@ export function Navbar({ isLight = true }: NavbarProps) {
                 href={link.href}
                 className={cn(
                   "transition-colors font-medium",
-                  isScrolled
+                  (isScrolled || forceWhite)
                     ? "text-slate-600 hover:text-primary"
                     : (isLight ? "text-slate-600 hover:text-primary" : "text-white/90 hover:text-white")
                 )}
@@ -78,7 +79,7 @@ export function Navbar({ isLight = true }: NavbarProps) {
           <button
             className={cn(
               "md:hidden p-2 transition-colors",
-              isScrolled
+              (isScrolled || forceWhite)
                 ? "text-foreground"
                 : (isLight ? "text-foreground" : "text-white")
             )}

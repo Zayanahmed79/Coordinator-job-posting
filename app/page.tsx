@@ -221,7 +221,7 @@ export default function Home() {
             <div className="flex flex-col items-start md:items-end">
               <h3 className="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider">Our socials</h3>
               <div className="flex flex-col gap-4">
-                <Link href="#" className="flex items-center gap-3 text-sm hover:text-primary transition-colors">
+                <Link href="https://www.linkedin.com/company/coordinators-pro" className="flex items-center gap-3 text-sm hover:text-primary transition-colors">
                   <Linkedin size={20} />
                   LinkedIn
                 </Link>
