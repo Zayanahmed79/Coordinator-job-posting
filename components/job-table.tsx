@@ -23,6 +23,7 @@ import {
     FileText,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { htmlToText } from '@/lib/utils'
 
 type JobTableProps = {
     jobs: JobListing[]
@@ -130,6 +131,7 @@ export function JobTable({
                         ) : (
                             jobs.map((job) => {
                                 const isExpanded = expandedDescriptions.has(job.id)
+                                const plainDescription = job.description ? htmlToText(job.description) : ''
 
                                 return (
                                     <div
@@ -145,9 +147,6 @@ export function JobTable({
                                                     <h3 className="font-semibold text-foreground text-lg leading-tight line-clamp-1" title={job.title}>
                                                         {job.title}
                                                     </h3>
-                                                    <p className="text-secondary font-semibold text-sm mt-0.5 line-clamp-1">
-                                                        {job.company}
-                                                    </p>
                                                 </div>
                                             </div>
 
@@ -186,19 +185,14 @@ export function JobTable({
                                             <span className="bg-background px-2.5 py-1 rounded-md border border-border/50">
                                                 {formatDate(job.created_at)}
                                             </span>
-                                            {job.pipline_id && (
-                                                <span className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-md border border-primary/20 font-bold">
-                                                    ID: {job.pipline_id}
-                                                </span>
-                                            )}
                                         </div>
 
                                         {job.description && (
                                             <div className="flex-1">
                                                 <p className={`text-sm text-muted-foreground leading-relaxed ${!isExpanded ? 'line-clamp-3' : ''}`}>
-                                                    {job.description.replace(/<[^>]*>/g, ' ')}
+                                                    {plainDescription}
                                                 </p>
-                                                {job.description.replace(/<[^>]*>/g, ' ').length > 150 && (
+                                                {plainDescription.length > 150 && (
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleDescription(job.id)}

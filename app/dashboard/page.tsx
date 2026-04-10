@@ -95,7 +95,7 @@ export default function DashboardPage() {
             />
 
             <header className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-xl border-b border-border/40 transition-all duration-300">
-                <div className="mx-auto max-w-[1400px] px-6 sm:px-12">
+                <div className="mx-auto max-w-350 px-6 sm:px-12">
                     <div className="flex items-center justify-between h-24">
                         <div className="flex items-center gap-2">
                             <Image
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-[1400px] px-6 sm:px-12 pt-28 pb-20">
+            <main className="mx-auto max-w-350 px-6 sm:px-12 pt-28 pb-20">
                 <div className="grid gap-10">
                     <section>
                         <JobForm onJobAdded={handleJobAdded} />

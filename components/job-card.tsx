@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { MapPin, Building2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, htmlToText } from "@/lib/utils"
 
 export interface Job {
   id: string
@@ -25,17 +25,11 @@ interface JobCardProps {
 
 export function JobCard({ job }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-
-  const stripHtml = (html: string) => {
-    if (typeof document === 'undefined') return html
-    const tmp = document.createElement("DIV")
-    tmp.innerHTML = html
-    return tmp.textContent || tmp.innerText || ""
-  }
+  const plainDescription = job.description ? htmlToText(job.description) : ""
 
   const truncateDescription = (text: string, maxLength = 160) => {
     if (!text) return ""
-    const plainText = stripHtml(text)
+    const plainText = htmlToText(text)
     if (plainText.length <= maxLength) return plainText
     return plainText.slice(0, maxLength).trim() + "..."
   }
@@ -87,36 +81,20 @@ export function JobCard({ job }: JobCardProps) {
               <div
                 className={cn(
                   "text-lg text-[#1A202C] leading-relaxed transition-all duration-300",
-                  !isExpanded && "max-h-[100px] overflow-hidden relative"
+                  !isExpanded && "max-h-25 overflow-hidden relative"
                 )}
-                dangerouslySetInnerHTML={{
-                  __html: (() => {
-                    if (typeof document === "undefined") return ""
-                    if (isExpanded) {
-                      // Show full decoded HTML when expanded
-                      const txt = document.createElement("textarea")
-                      txt.innerHTML = job.description
-                      const decoded = txt.value
-                      if (decoded.includes("&lt;") || decoded.includes("&gt;")) {
-                        txt.innerHTML = decoded
-                        return txt.value
-                      }
-                      return decoded
-                    }
-                    // Show truncated plain text preview
-                    return truncateDescription(job.description)
-                  })()
-                }}
-              />
-              {!isExpanded && job.description.length > 160 && (
+              >
+                {isExpanded ? plainDescription : truncateDescription(job.description)}
+              </div>
+              {!isExpanded && plainDescription.length > 160 && (
                 <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white to-transparent pointer-events-none" />
               )}
-              {job.description.length > 160 && (
+              {plainDescription.length > 160 && (
                 <button
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setIsExpanded(!isExpanded);
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsExpanded(!isExpanded)
                   }}
                   className="mt-2 inline-flex items-center gap-0.5 text-md font-semibold text-secondary hover:underline transition-all relative z-10"
                 >
