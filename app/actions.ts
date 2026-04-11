@@ -41,6 +41,7 @@ export type JobListing = {
     pipline_id: number | null
     experience: string | null
     created_at: string
+    ai_job_description: string | null
     questions?: any[]
 }
 
@@ -78,6 +79,7 @@ export async function createJob(formData: {
     apply_link?: string
     pipline_id?: string | number
     description?: string
+    ai_job_description?: string
     questions?: any[]
 }): Promise<ActionResponse<JobListing>> {
     const validation = validateJobInput(formData)
@@ -93,6 +95,7 @@ export async function createJob(formData: {
         apply_link: formData.apply_link ? formData.apply_link.trim() : null,
         pipline_id: formData.pipline_id ? Number(formData.pipline_id) : null,
         description: formData.description ? formData.description.trim() : null,
+        ai_job_description: formData.ai_job_description ? formData.ai_job_description.trim() : null,
         questions: formData.questions || [],
     }
 
@@ -151,6 +154,38 @@ export async function deleteJob(id: string): Promise<ActionResponse> {
 
     revalidateTag('jobs', 'max')
     return { success: true, data: undefined }
+}
+
+export async function updateJob(id: string, updates: {
+    description?: string
+    ai_job_description?: string
+}): Promise<ActionResponse<JobListing>> {
+    if (!id || typeof id !== 'string' || id.length < 10) {
+        return { success: false, error: 'Invalid job ID' }
+    }
+
+    const sanitized: Record<string, string | null> = {}
+    if ('description' in updates) {
+        sanitized.description = updates.description ? updates.description.trim() : null
+    }
+    if ('ai_job_description' in updates) {
+        sanitized.ai_job_description = updates.ai_job_description ? updates.ai_job_description.trim() : null
+    }
+
+    const { data, error } = await supabase
+        .from('job_listings')
+        .update(sanitized)
+        .eq('id', id)
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Supabase error:', error)
+        return { success: false, error: 'Failed to update job listing. Please try again.' }
+    }
+
+    revalidateTag('jobs', 'max')
+    return { success: true, data }
 }
 
 export async function getJobs(page = 1, limit = 10, search = ''): Promise<ActionResponse<{

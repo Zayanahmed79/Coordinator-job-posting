@@ -72,7 +72,7 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                 location: RecruiterflowJob.location || 'Remote',
                 company: RecruiterflowJob.company?.name || RecruiterflowJob.company || 'Coordinator',
                 job_type: jobTypeString.toLowerCase(),
-                pipline_id: jobId,
+                pipline_id: Number(jobId),
                 questions: RecruiterflowJob.application_form || RecruiterflowJob.questions || [],
                 // Recruiterflow sometimes has apply_link, otherwise we point to our own page
                 apply_link: RecruiterflowJob.apply_link || `https://careers.coordinators.pro/jobs/${jobId}`
@@ -85,6 +85,18 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                 toast.success('Job listing created successfully')
                 onJobAdded(createResult.data)
                 setJobId('')
+
+                // Fire n8n webhook to generate AI summary (fire-and-forget)
+                // Use jobData directly — it has the full description before Supabase strips it
+                fetch('https://n8n.unitzero.tech/webhook/job-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: createResult.data.id,
+                        title: jobData.title,
+                        description: jobData.description,
+                    }),
+                }).catch(() => {})
             } else {
                 toast.error(createResult.error)
             }
@@ -141,15 +153,6 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                             </>
                         )}
                     </Button>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10">
-                    <p className="text-[11px] text-primary/80 font-bold leading-none">
-                        PRO TIP:
-                    </p>
-                    <p className="text-[11px] text-muted-foreground font-medium">
-                        This will automatically pull the title, description, and job questions from Recruiterflow.
-                    </p>
                 </div>
             </form>
         </div>

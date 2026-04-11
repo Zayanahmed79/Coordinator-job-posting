@@ -15,5 +15,6 @@ export type JobListing = {
   type: string
   pipline_id: number | null
   created_at: string
+  ai_job_description: string | null
   questions?: any[]
 }

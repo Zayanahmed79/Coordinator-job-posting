@@ -24,6 +24,7 @@ export default function DashboardPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const debouncedSearch = useDebounce(searchQuery, 500)
     const [isPending, startTransition] = useTransition()
+    const [pendingAiIds, setPendingAiIds] = useState<Set<string>>(new Set())
     const router = useRouter()
 
     const { data, error, isLoading, mutate } = useSWR(
@@ -50,6 +51,41 @@ export default function DashboardPage() {
                         : undefined,
                 { revalidate: false }
             )
+
+            // Mark this job as pending AI summary — shows skeleton in the card
+            setPendingAiIds((prev) => new Set(prev).add(job.id))
+
+            // Poll every 4s for up to 20s until n8n writes the AI summary back
+            let attempts = 0
+            const interval = setInterval(async () => {
+                attempts++
+                const result = await getJobs(1, 100, '')
+                if (!result.success) { clearInterval(interval); return }
+                const updated = result.data.jobs.find((j) => j.id === job.id)
+                if (updated?.ai_job_description) {
+                    mutate(
+                        (current) =>
+                            current
+                                ? { ...current, jobs: current.jobs.map((j) => j.id === updated.id ? updated : j) }
+                                : undefined,
+                        { revalidate: false }
+                    )
+                    setPendingAiIds((prev) => {
+                        const next = new Set(prev)
+                        next.delete(job.id)
+                        return next
+                    })
+                    clearInterval(interval)
+                }
+                if (attempts >= 5) {
+                    setPendingAiIds((prev) => {
+                        const next = new Set(prev)
+                        next.delete(job.id)
+                        return next
+                    })
+                    clearInterval(interval)
+                }
+            }, 4000)
         },
         [mutate]
     )
@@ -67,6 +103,22 @@ export default function DashboardPage() {
                         }
                         : undefined,
                 { revalidate: true }
+            )
+        },
+        [mutate]
+    )
+
+    const handleJobUpdated = useCallback(
+        (updated: JobListing) => {
+            mutate(
+                (current) =>
+                    current
+                        ? {
+                            ...current,
+                            jobs: current.jobs.map((j) => (j.id === updated.id ? updated : j)),
+                        }
+                        : undefined,
+                { revalidate: false }
             )
         },
         [mutate]
@@ -170,8 +222,10 @@ export default function DashboardPage() {
                                 page={data.page}
                                 totalPages={data.totalPages}
                                 onJobDeleted={handleJobDeleted}
+                                onJobUpdated={handleJobUpdated}
                                 onPageChange={handlePageChange}
                                 isLoading={isPending}
+                                pendingAiIds={pendingAiIds}
                             />
                         ) : null}
                     </section>

@@ -21,15 +21,28 @@ export default function JobDetailPage() {
             setLoading(true)
             const isNumeric = /^\d+$/.test(id)
 
-            let query = supabase.from('job_listings').select('*')
+            let data = null
+            let error = null
 
             if (isNumeric) {
-                query = query.eq('pipline_id', Number(id))
+                // Try pipline_id first
+                const result = await supabase
+                    .from('job_listings')
+                    .select('*')
+                    .eq('pipline_id', Number(id))
+                    .maybeSingle()
+                data = result.data
+                error = result.error
             } else {
-                query = query.eq('id', id)
+                // Try UUID id
+                const result = await supabase
+                    .from('job_listings')
+                    .select('*')
+                    .eq('id', id)
+                    .maybeSingle()
+                data = result.data
+                error = result.error
             }
-
-            const { data, error } = await query.single()
 
             if (!error && data) {
                 setJob(data)
