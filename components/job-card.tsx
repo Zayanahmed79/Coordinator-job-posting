@@ -39,7 +39,7 @@ export function JobCard({ job }: JobCardProps) {
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
             <h3 className="text-xl font-bold text-foreground leading-tight">{job.title || "Untitled Position"}</h3>
-            <p className="text-muted-foreground text-md font-medium mt-1 uppercase tracking-wide">{job.company || "Company"}</p>
+            <p className="text-muted-foreground text-md font-medium mt-1 uppercase tracking-wide">{job.company?.split(' - ').pop() || "Company"}</p>
           </div>
         </div>
 

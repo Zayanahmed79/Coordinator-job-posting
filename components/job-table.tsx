@@ -154,7 +154,7 @@ export function JobTable({
                                                     <h3 className="font-semibold text-foreground text-base leading-snug line-clamp-1" title={job.title}>
                                                         {job.title}
                                                     </h3>
-                                                    <p className="text-sm text-muted-foreground truncate">{job.company || '—'}</p>
+                                                    <p className="text-sm text-muted-foreground truncate">{job.company?.split(' - ').pop() || '—'}</p>
                                                 </div>
                                             </div>
 
