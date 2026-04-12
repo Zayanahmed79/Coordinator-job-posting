@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.next()
     }
 
-    // Protect /dashboard — redirect to /login if not authenticated
+    // Protect /dashboard redirect to /login if not authenticated
     if (pathname.startsWith('/dashboard')) {
         if (!authToken?.value) {
             return NextResponse.redirect(new URL('/login', request.url))

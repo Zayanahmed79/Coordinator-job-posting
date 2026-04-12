@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils"
 const faqs = [
   {
     question: "How does coordinators.pro help my career?",
-    answer: "We connect you with high-growth companies that offer more than just a paycheck—they offer mentorship, clear career paths, and a culture that values your professional development."
+    answer: "We connect you with high growth companies that offer more than just a paycheck they offer mentorship, clear career paths, and a culture that values your professional development."
   },
   {
     question: "Is it really faster than typical job boards?",
-    answer: "Yes. By bypassing third-party recruiters and applying directly to decision-makers, our candidates typically get feedback up to 3x faster than traditional platforms."
+    answer: "Yes. By bypassing third party recruiters and applying directly to decision makers, our candidates typically get feedback up to 3x faster than traditional platforms."
   },
   {
     question: "How do you vet the companies on your platform?",

@@ -52,7 +52,7 @@ export default function DashboardPage() {
                 { revalidate: false }
             )
 
-            // Mark this job as pending AI summary — shows skeleton in the card
+            // Mark this job as pending AI summary shows skeleton in the card
             setPendingAiIds((prev) => new Set(prev).add(job.id))
 
             // Poll every 4s for up to 20s until n8n writes the AI summary back

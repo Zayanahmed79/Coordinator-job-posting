@@ -19,7 +19,7 @@ export default function Home() {
               <span className="text-foreground">career opportunity.</span>
             </h1>
             <p className="mt-6 text-slate-600 text-lg md:text-[22px] font-medium max-w-xl leading-relaxed mx-auto lg:mx-0">
-              Browse curated job listings from top companies—so you can find the perfect role, advance your career, and achieve your professional goals.
+              Browse curated job listings from top companies so you can find the perfect role, advance your career, and achieve your professional goals.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <Link

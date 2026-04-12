@@ -17,11 +17,6 @@ import {
 import {
     Plus,
     Loader2,
-    Briefcase,
-    Building2,
-    MapPin,
-    FileText,
-    Clock,
     Hash
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -87,7 +82,7 @@ export function JobForm({ onJobAdded }: JobFormProps) {
                 setJobId('')
 
                 // Fire n8n webhook to generate AI summary (fire-and-forget)
-                // Use jobData directly — it has the full description before Supabase strips it
+                // Use jobData directly it has the full description before Supabase strips it
                 fetch('https://n8n.unitzero.tech/webhook/job-summary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
