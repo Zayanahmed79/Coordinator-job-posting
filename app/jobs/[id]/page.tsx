@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,116 @@ export default function JobDetailPage() {
     const [job, setJob] = useState<JobListing | null>(null)
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
+
+    const descriptionHtml = useMemo(() => {
+        if (!job?.description) return ''
+        if (typeof document === 'undefined' || typeof window === 'undefined') return ''
+
+        const decodeHtml = (value: string) => {
+            const txt = document.createElement('textarea')
+            txt.innerHTML = value
+            const decoded = txt.value
+            if (decoded.includes('&lt;') || decoded.includes('&gt;')) {
+                txt.innerHTML = decoded
+                return txt.value
+            }
+            return decoded
+        }
+
+        const escapeHtml = (value: string) =>
+            value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+
+        const toParagraphHtml = (value: string) => {
+            const paragraphs = value
+                .split(/\n{2,}/)
+                .map((part) => part.trim())
+                .filter(Boolean)
+
+            return paragraphs
+                .map((part) => `<p>${escapeHtml(part).replace(/\n/g, '<br />')}</p>`)
+                .join('')
+        }
+
+        const sanitizeUrl = (href: string) => {
+            try {
+                const parsed = new URL(href, window.location.origin)
+                return ['http:', 'https:', 'mailto:'].includes(parsed.protocol)
+                    ? parsed.toString()
+                    : ''
+            } catch {
+                return ''
+            }
+        }
+
+        const allowedTags = new Set([
+            'a', 'b', 'blockquote', 'br', 'div', 'em', 'font', 'h1', 'h2', 'h3', 'i', 'li', 'ol', 'p', 'strong', 'u', 'ul', 'span',
+        ])
+
+        const cleanNode = (node: ChildNode): string => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                return escapeHtml(node.textContent || '')
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) {
+                return ''
+            }
+
+            const element = node as HTMLElement
+            const tagName = element.tagName.toLowerCase()
+
+            if (!allowedTags.has(tagName)) {
+                return Array.from(element.childNodes).map(cleanNode).join('')
+            }
+
+            if (tagName === 'br') {
+                return '<br />'
+            }
+
+            const attributes: string[] = []
+
+            if (tagName === 'a') {
+                const href = sanitizeUrl(element.getAttribute('href') || '')
+                if (href) {
+                    attributes.push(`href="${escapeHtml(href)}"`)
+                    attributes.push('target="_blank"')
+                    attributes.push('rel="noopener noreferrer"')
+                }
+            } else if (tagName === 'span') {
+                const fontSize = element.style.fontSize.trim()
+                if (fontSize && /^(\d+(?:\.\d+)?)(px|rem|em|%)$/i.test(fontSize)) {
+                    attributes.push(`style="font-size: ${escapeHtml(fontSize)}"`)
+                }
+            } else if (tagName === 'font') {
+                const fontSize = element.getAttribute('size')
+                if (fontSize) {
+                    const normalizedSize = /^\d+$/.test(fontSize)
+                        ? `${Math.max(10, Math.min(50, Number(fontSize)))}px`
+                        : ''
+                    if (normalizedSize) {
+                        attributes.push(`style="font-size: ${escapeHtml(normalizedSize)}"`)
+                    }
+                }
+            }
+
+            const inner = Array.from(element.childNodes).map(cleanNode).join('')
+            const outputTag = tagName === 'font' ? 'span' : tagName
+            return `<${outputTag}${attributes.length ? ` ${attributes.join(' ')}` : ''}>${inner}</${outputTag}>`
+        }
+
+        const decoded = decodeHtml(job.description)
+        if (!/<\/?[a-z][\s\S]*>/i.test(decoded)) {
+            return toParagraphHtml(decoded)
+        }
+
+        const parser = new DOMParser()
+        const documentFragment = parser.parseFromString(decoded, 'text/html')
+        return Array.from(documentFragment.body.childNodes).map(cleanNode).join('').trim()
+    }, [job?.description])
 
     useEffect(() => {
         async function fetchJob() {
@@ -71,22 +181,6 @@ export default function JobDetailPage() {
         )
     }
 
-    // Reliable HTML Decoding helper for client-side
-    const decodeHTML = (html: string) => {
-        if (typeof document === 'undefined') return html
-        const txt = document.createElement('textarea')
-        txt.innerHTML = html
-        // Handle double encoding if necessary
-        const decoded = txt.value
-        if (decoded.includes('&lt;') || decoded.includes('&gt;')) {
-            txt.innerHTML = decoded
-            return txt.value
-        }
-        return decoded
-    }
-
-    const descriptionHtml = job.description ? decodeHTML(job.description) : ''
-
     return (
         <div className="min-h-screen bg-[#F5F0EB] text-[#1E2A4A] font-sans">
             {/* Pass isLight={false} to keep navbar text white/light on the dark header */}
@@ -123,7 +217,7 @@ export default function JobDetailPage() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-8 min-w-[240px]">
+                        <div className="flex flex-col gap-8 min-w-60">
                             <Button
                                 className="bg-[#F47521] hover:bg-[#D9661D] text-white rounded-xl h-14 px-10 text-lg font-bold transition-all shadow-xl shadow-orange-500/25 group border-0 active:scale-95"
                                 onClick={() => {

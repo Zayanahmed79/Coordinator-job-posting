@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useRef, useState, useTransition } from 'react'
 import { deleteJob, updateJob, type JobListing } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,10 +25,11 @@ import {
 import {
     MoreHorizontal, Pencil, ExternalLink, Trash2,
     ChevronLeft, ChevronRight, Loader2, FileText,
-    X, Save, Briefcase, Sparkles,
+    X, Save, Briefcase, Sparkles, Bold, Italic, Underline, Link2, List, ListOrdered, Eraser, Type,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { htmlToText } from '@/lib/utils'
+
+const FONT_SIZE_OPTIONS = Array.from({ length: 41 }, (_, index) => 10 + index)
 
 type JobTableProps = {
     jobs: JobListing[]
@@ -57,14 +58,137 @@ export function JobTable({
     const [editDescription, setEditDescription] = useState('')
     const [isPending, startTransition] = useTransition()
     const [isEditPending, startEditTransition] = useTransition()
+    const descriptionEditorRef = useRef<HTMLDivElement | null>(null)
+    const editorSelectionRef = useRef<Range | null>(null)
 
     const openEdit = useCallback((job: JobListing) => {
         setEditJob(job)
         setEditSummary(job.ai_job_description || '')
-        setEditDescription(job.description ? htmlToText(job.description) : '')
+        setEditDescription(job.description || '')
     }, [])
 
     const closeEdit = useCallback(() => setEditJob(null), [])
+
+    const saveEditorSelection = useCallback(() => {
+        const selection = window.getSelection()
+        if (!selection || selection.rangeCount === 0) return
+
+        editorSelectionRef.current = selection.getRangeAt(0)
+    }, [])
+
+    const restoreEditorSelection = useCallback(() => {
+        const selection = window.getSelection()
+        const range = editorSelectionRef.current
+        if (!selection || !range) return
+
+        selection.removeAllRanges()
+        selection.addRange(range)
+    }, [])
+
+    const normalizeDescriptionEditor = useCallback(() => {
+        const editor = descriptionEditorRef.current
+        if (!editor) return
+
+        editor.querySelectorAll('font[size]').forEach((node) => {
+            const element = node as HTMLElement
+            const fontSize = element.getAttribute('size')
+            if (!fontSize) return
+
+            const sizeMap: Record<string, string> = {
+                '1': '10px',
+                '2': '13px',
+                '3': '16px',
+                '4': '18px',
+                '5': '24px',
+                '6': '32px',
+                '7': '40px',
+            }
+
+            const span = document.createElement('span')
+            span.style.fontSize = sizeMap[fontSize] || `${fontSize}px`
+            span.innerHTML = element.innerHTML
+            element.replaceWith(span)
+        })
+
+        setEditDescription(editor.innerHTML)
+    }, [])
+
+    useEffect(() => {
+        if (!editJob || !descriptionEditorRef.current) return
+        descriptionEditorRef.current.innerHTML = editDescription || ''
+    }, [editJob?.id])
+
+    const applyDescriptionFormat = useCallback((command: string, value?: string) => {
+        const editor = descriptionEditorRef.current
+        if (!editor) return
+
+        editor.focus()
+        restoreEditorSelection()
+        document.execCommand(command, false, value)
+        normalizeDescriptionEditor()
+    }, [normalizeDescriptionEditor, restoreEditorSelection])
+
+    const applyHeadingFormat = useCallback((level: 'h1' | 'h2') => {
+        const editor = descriptionEditorRef.current
+        if (!editor) return
+
+        editor.focus()
+        restoreEditorSelection()
+        document.execCommand('formatBlock', false, `<${level}>`)
+        normalizeDescriptionEditor()
+    }, [normalizeDescriptionEditor, restoreEditorSelection])
+
+    const applyFontSize = useCallback((size: number) => {
+        const editor = descriptionEditorRef.current
+        if (!editor) return
+
+        editor.focus()
+        restoreEditorSelection()
+
+        const selection = window.getSelection()
+        if (!selection || selection.rangeCount === 0) {
+            return
+        }
+
+        const range = selection.getRangeAt(0)
+        if (range.collapsed) {
+            return
+        }
+
+        const span = document.createElement('span')
+        span.style.fontSize = `${size}px`
+        span.style.lineHeight = 'inherit'
+
+        const contents = range.extractContents()
+        span.appendChild(contents)
+        range.insertNode(span)
+
+        selection.removeAllRanges()
+        const newRange = document.createRange()
+        newRange.selectNodeContents(span)
+        selection.addRange(newRange)
+
+        normalizeDescriptionEditor()
+    }, [normalizeDescriptionEditor, restoreEditorSelection])
+
+    const applyCustomFontSize = useCallback(() => {
+        const rawValue = window.prompt('Enter font size in px (10-50)', '16')
+        if (!rawValue) return
+
+        const parsed = Number(rawValue)
+        if (Number.isNaN(parsed) || parsed < 10 || parsed > 50) {
+            toast.error('Enter a size between 10 and 50 px')
+            return
+        }
+
+        applyFontSize(parsed)
+    }, [applyFontSize])
+
+    const insertLink = useCallback(() => {
+        const url = window.prompt('Enter link URL')
+        if (!url) return
+        applyDescriptionFormat('createLink', url)
+    }, [applyDescriptionFormat])
 
     const handleEditSave = () => {
         if (!editJob) return
@@ -137,7 +261,6 @@ export function JobTable({
                             </div>
                         ) : (
                             jobs.map((job) => {
-                                const plainDescription = job.description ? htmlToText(job.description) : ''
                                 const isPendingAi = pendingAiIds?.has(job.id)
 
                                 return (
@@ -271,13 +394,75 @@ export function JobTable({
                                     <FileText className="size-3.5 text-primary" />
                                     Full Description
                                 </Label>
-                                <Textarea
-                                    rows={18}
-                                    placeholder="Full job description..."
-                                    value={editDescription}
-                                    onChange={(e) => setEditDescription(e.target.value)}
-                                    className="resize-y rounded-xl text-sm leading-relaxed"
-                                />
+                                <div className="rounded-xl border border-border bg-background shadow-sm overflow-hidden">
+                                    <div className="flex flex-wrap items-center gap-2 border-b border-border/70 bg-muted/30 px-3 py-2">
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('bold')} className="h-9 rounded-lg gap-2 px-3">
+                                            <Bold className="size-4" /> Bold
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('italic')} className="h-9 rounded-lg gap-2 px-3">
+                                            <Italic className="size-4" /> Italic
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('underline')} className="h-9 rounded-lg gap-2 px-3">
+                                            <Underline className="size-4" /> Underline
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('insertUnorderedList')} className="h-9 rounded-lg gap-2 px-3">
+                                            <List className="size-4" /> Bullets
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('insertOrderedList')} className="h-9 rounded-lg gap-2 px-3">
+                                            <ListOrdered className="size-4" /> Numbered
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyHeadingFormat('h1')} className="h-9 rounded-lg gap-2 px-3">
+                                            <span className="text-[11px] font-black leading-none">H1</span> Heading 1
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyHeadingFormat('h2')} className="h-9 rounded-lg gap-2 px-3">
+                                            <span className="text-[11px] font-black leading-none">H2</span> Heading 2
+                                        </Button>
+                                        <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2 h-9">
+                                            <Type className="size-4 text-muted-foreground" />
+                                            <select
+                                                defaultValue=""
+                                                onMouseDown={() => saveEditorSelection()}
+                                                onChange={(event) => {
+                                                    const value = event.target.value
+                                                    event.target.value = ''
+                                                    if (!value) return
+                                                    if (value === 'custom') {
+                                                        applyCustomFontSize()
+                                                        return
+                                                    }
+                                                    applyFontSize(Number(value))
+                                                }}
+                                                className="h-8 bg-transparent text-xs font-medium text-foreground outline-none"
+                                                aria-label="Font size"
+                                            >
+                                                <option value="" disabled>Size</option>
+                                                {FONT_SIZE_OPTIONS.map((size) => (
+                                                    <option key={size} value={size}>{size}px</option>
+                                                ))}
+                                                <option value="custom">Custom...</option>
+                                            </select>
+                                        </div>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={insertLink} className="h-9 rounded-lg gap-2 px-3">
+                                            <Link2 className="size-4" /> Link
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onMouseDown={(event) => { event.preventDefault(); saveEditorSelection() }} onClick={() => applyDescriptionFormat('removeFormat')} className="h-9 rounded-lg gap-2 px-3">
+                                            <Eraser className="size-4" /> Clear
+                                        </Button>
+                                    </div>
+                                    <div
+                                        ref={descriptionEditorRef}
+                                        role="textbox"
+                                        aria-label="Job description editor"
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onMouseUp={saveEditorSelection}
+                                        onKeyUp={saveEditorSelection}
+                                        onInput={normalizeDescriptionEditor}
+                                        onBlur={normalizeDescriptionEditor}
+                                        className="min-h-104 max-h-136 overflow-y-auto px-4 py-3 text-sm leading-7 text-foreground outline-none prose prose-slate max-w-none prose-headings:text-[#1E3A5F] prose-a:text-[#F47521] prose-a:underline prose-strong:text-[#1E3A5F]"
+                                    />
+                                </div>
+                                <p className="text-xs text-muted-foreground">Format the text with the toolbar. The stored value is HTML, so headings, links, and lists will render on the public page.</p>
                             </div>
                         </div>
 
